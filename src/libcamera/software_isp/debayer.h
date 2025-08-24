@@ -82,6 +82,9 @@ public:
 
 private:
 	virtual Size patternSize(PixelFormat inputFormat) = 0;
+
+protected:
+	void setParams(DebayerParams &params);
 };
 
 } /* namespace libcamera */
