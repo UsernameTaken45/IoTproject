@@ -32,6 +32,7 @@ LOG_DECLARE_CATEGORY(Debayer)
 class Debayer : public Object
 {
 public:
+	Debayer();
 	virtual ~Debayer() = 0;
 
 	virtual int configure(const StreamConfiguration &inputCfg,
