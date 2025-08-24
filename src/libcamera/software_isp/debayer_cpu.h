@@ -17,7 +17,6 @@
 
 #include <libcamera/base/object.h>
 
-#include "libcamera/internal/bayer_format.h"
 #include "libcamera/internal/software_isp/swstats_cpu.h"
 
 #include "debayer.h"

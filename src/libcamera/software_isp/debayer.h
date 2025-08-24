@@ -20,6 +20,7 @@
 #include <libcamera/geometry.h>
 #include <libcamera/stream.h>
 
+#include "libcamera/internal/bayer_format.h"
 #include "libcamera/internal/dma_buf_allocator.h"
 #include "libcamera/internal/software_isp/benchmark.h"
 #include "libcamera/internal/software_isp/debayer_params.h"
@@ -87,6 +88,7 @@ private:
 protected:
 	void setParams(DebayerParams &params);
 	void dmaSyncBegin(std::vector<DmaSyncer> &dmaSyncers, FrameBuffer *input, FrameBuffer *output);
+	bool isStandardBayerOrder(BayerFormat::Order order);
 };
 
 } /* namespace libcamera */
