@@ -55,6 +55,10 @@ public:
 	using MapFlags = Flags<MapFlag>;
 
 	MappedFrameBuffer(const FrameBuffer *buffer, MapFlags flags);
+	int getPlaneFD(unsigned int plane);
+
+private:
+	const FrameBuffer *buffer_;
 };
 
 LIBCAMERA_FLAGS_ENABLE_OPERATORS(MappedFrameBuffer::MapFlag)

@@ -238,6 +238,16 @@ MappedFrameBuffer::MappedFrameBuffer(const FrameBuffer *buffer, MapFlags flags)
 
 		planes_.emplace_back(info.address + plane.offset, plane.length);
 	}
+
+	buffer_ = buffer;
+}
+
+int MappedFrameBuffer::getPlaneFD(unsigned int plane)
+{
+	if (plane > buffer_->planes().size())
+		return -EINVAL;
+
+	return buffer_->planes()[plane].fd.get();
 }
 
 } /* namespace libcamera */
