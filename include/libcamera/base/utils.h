@@ -33,6 +33,9 @@
 
 #endif
 
+#define ALIGN_TO(val, alignment) \
+    (((uintptr_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
+
 namespace libcamera {
 
 namespace utils {

@@ -24,6 +24,7 @@
  */
 #define ALOGE(...) fprintf(stderr, LOG_TAG __VA_ARGS__)
 
+#include <libcamera/base/utils.h>
 #include <system/camera_metadata.h>
 #include <camera_metadata_hidden.h>
 
@@ -38,9 +39,6 @@
 #define ERROR           1
 #define NOT_FOUND       (-ENOENT)
 #define SN_EVENT_LOG_ID 0x534e4554
-
-#define ALIGN_TO(val, alignment) \
-    (((uintptr_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
 
 /**
  * A single metadata entry, storing an array of values of a given type. If the
