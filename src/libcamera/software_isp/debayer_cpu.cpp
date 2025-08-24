@@ -526,8 +526,13 @@ int DebayerCpu::configure(const StreamConfiguration &inputCfg,
 	window_.width = outputCfg.size.width;
 	window_.height = outputCfg.size.height;
 
-	/* Don't pass x,y since process() already adjusts src before passing it */
-	stats_->setWindow(Rectangle(window_.size()));
+	/*
+	 * Don't pass x,y from window_ since process() already adjusts for it.
+	 * But crop the window to 2/3 of its width and height for speedup.
+	 * The speedup is more important with GPU than with CPU ISP; we want the
+	 * same implementation on both.
+	 */
+	stats_->setWindow((window_.size() * 2 / 3).centeredTo(window_.center()));
 
 	/* pad with patternSize.Width on both left and right side */
 	lineBufferPadding_ = inputConfig_.patternSize.width * inputConfig_.bpp / 8;
