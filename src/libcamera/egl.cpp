@@ -51,8 +51,8 @@ int eGL::createDMABufTexture2D(eGLImage *eglImage, int fd, bool output)
 		EGL_DMA_BUF_PLANE0_FD_EXT, fd,
 		EGL_DMA_BUF_PLANE0_OFFSET_EXT, 0,
 		EGL_DMA_BUF_PLANE0_PITCH_EXT, (EGLint)eglImage->stride_,
-		EGL_NONE, EGL_NONE,	/* modifier lo */
-		EGL_NONE, EGL_NONE,	/* modifier hi */
+		EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT, 0,
+		EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT, 0,
 		EGL_NONE,
 	};
 
