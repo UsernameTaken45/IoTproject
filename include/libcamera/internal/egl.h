@@ -129,5 +129,7 @@ private:
 	PFNEGLCREATESYNCKHRPROC eglCreateSyncKHR;
 	PFNEGLDESTROYSYNCKHRPROC eglDestroySyncKHR;
 	PFNEGLCLIENTWAITSYNCKHRPROC eglClientWaitSyncKHR;
+
+	PFNGLGETSTRINGPROC glGetString;
 };
 } //namespace libcamera

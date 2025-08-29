@@ -151,6 +151,10 @@ int eGL::initEGLContext(GBM *gbmContext)
 	EGLint major;
 	EGLint minor;
 
+	const char *glVersion;
+	EGLint glMajor;
+	EGLint glMinor;
+
 	if (!eglBindAPI(EGL_OPENGL_ES_API)) {
 		LOG(eGL, Error) << "API bind fail";
 		goto fail;
@@ -209,6 +213,12 @@ int eGL::initEGLContext(GBM *gbmContext)
 		goto fail;
 	}
 
+	glGetString = (PFNGLGETSTRINGPROC)eglGetProcAddress("glGetString");
+	if (!glGetString) {
+		LOG(eGL, Error) << "glGetString not found";
+		goto fail;
+	}
+
 	if (eglChooseConfig(display_, configAttribs, &config, 1, &numConfigs) != EGL_TRUE) {
 		LOG(eGL, Error) << "eglChooseConfig fail";
 		goto fail;
@@ -221,6 +231,14 @@ int eGL::initEGLContext(GBM *gbmContext)
 	}
 
 	makeCurrent();
+
+	glVersion = (const char *)glGetString(GL_VERSION);
+	if (glVersion &&
+	    (sscanf(glVersion, "%d.%d", &glMajor, &glMinor) == 2 ||
+	     sscanf(glVersion, "OpenGL ES %d.%d", &glMajor, &glMinor) == 2) &&
+	    glMajor > 0 && glMinor >= 0) {
+		LOG(eGL, Info) << "GLES: version: " << glMajor << "." << glMinor;
+	}
 
 	sync_ = eglCreateSyncKHR(display_, EGL_SYNC_FENCE_KHR, NULL);
 	if (sync_ == EGL_NO_SYNC_KHR) {
