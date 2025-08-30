@@ -1153,21 +1153,37 @@ CameraConfiguration::Status SimpleCameraConfiguration::validate()
 	 * the smallest sensor resolution that can accommodate all streams
 	 * without upscaling.
 	 */
+	const SimpleCameraData::Configuration *unalignedPipeConfig = nullptr;
 	const SimpleCameraData::Configuration *maxPipeConfig = nullptr;
 	pipeConfig_ = nullptr;
 
 	for (const SimpleCameraData::Configuration *pipeConfig : *configs) {
+		const PixelFormatInfo &info = PixelFormatInfo::info(pipeConfig->captureFormat);
 		const Size &size = pipeConfig->captureSize;
+		unsigned int stride = info.stride(size.width, 0, 16);
+
+		LOG(SimplePipeline, Info) << "validate checking config size.width " << size.width << " stride " << stride;
 
 		if (size.width >= maxStreamSize.width &&
 		    size.height >= maxStreamSize.height) {
-			if (!pipeConfig_ || size < pipeConfig_->captureSize)
-				pipeConfig_ = pipeConfig;
+			if (stride % 64 == 0) {
+				if (!pipeConfig_ || size < pipeConfig_->captureSize) {
+					pipeConfig_ = pipeConfig;
+					LOG(SimplePipeline, Info) << "validate choose config size.width " << size.width << " stride " << stride;
+				}
+			} else {
+				if (!unalignedPipeConfig || size < unalignedPipeConfig->captureSize) {
+					unalignedPipeConfig = pipeConfig;
+				}
+			}
 		}
 
 		if (!maxPipeConfig || maxPipeConfig->captureSize < size)
 			maxPipeConfig = pipeConfig;
 	}
+
+	if (!pipeConfig_)
+		pipeConfig_ = unalignedPipeConfig;
 
 	/* If no configuration was large enough, select the largest one. */
 	if (!pipeConfig_)
