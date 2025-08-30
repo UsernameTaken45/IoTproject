@@ -15,6 +15,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <GLES3/gl32.h>
+
 #include <libdrm/drm_fourcc.h>
 #include <linux/dma-buf.h>
 #include <linux/dma-heap.h>
@@ -97,9 +99,58 @@ done:
 	return ret;
 }
 
-int eGL::createInputDMABufTexture2D(eGLImage *eglImage, int fd)
+void eGL::createInputDMABufTexture2D(eGLImage *eglImage, GLint format, EGLint width, EGLint height, EGLint stride, int fd)
 {
-	return createDMABufTexture2D(eglImage, fd, false);
+	EGLint drm_format;
+
+	switch (format) {
+	case GL_LUMINANCE:
+		drm_format = DRM_FORMAT_R8;
+		break;
+	case GL_RG:
+		drm_format = DRM_FORMAT_RG88;
+		break;
+	default:
+		LOG(eGL, Error) << "unhandled GL format";
+		return;
+	}
+
+	EGLint image_attrs[] = {
+		EGL_WIDTH, width,
+		EGL_HEIGHT, height,
+		EGL_LINUX_DRM_FOURCC_EXT, drm_format,
+		EGL_DMA_BUF_PLANE0_FD_EXT, fd,
+		EGL_DMA_BUF_PLANE0_OFFSET_EXT, 0,
+		EGL_DMA_BUF_PLANE0_PITCH_EXT, stride,
+		EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT, 0,
+		EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT, 0,
+		EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+		EGL_NONE,
+	};
+
+	eglImage->image_ = eglCreateImageKHR(display_, EGL_NO_CONTEXT,
+					     EGL_LINUX_DMA_BUF_EXT,
+					     NULL, image_attrs);
+
+	if (eglImage->image_ == EGL_NO_IMAGE_KHR) {
+		LOG(eGL, Debug) << "eglCreateImageKHR failed";
+		return;
+	}
+
+	// Bind texture unit and texture
+	glActiveTexture(eglImage->texture_unit_);
+	glBindTexture(GL_TEXTURE_2D, eglImage->texture_);
+
+	// Generate texture with filter semantics
+	glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage->image_);
+
+	// Nearest filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Wrap to edge to avoid edge artifacts
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 int eGL::createOutputDMABufTexture2D(eGLImage *eglImage, int fd)
 {
@@ -109,6 +160,7 @@ int eGL::createOutputDMABufTexture2D(eGLImage *eglImage, int fd)
 void eGL::destroyDMABufTexture(eGLImage *eglImage)
 {
 	eglDestroyImage(display_, eglImage->image_);
+	eglImage->image_ = EGL_NO_IMAGE_KHR;
 }
 
 // Generate a 2D texture from an input buffer directly
