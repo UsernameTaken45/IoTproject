@@ -176,6 +176,8 @@ SoftwareIsp::SoftwareIsp(PipelineHandler *pipe, const CameraSensor *sensor,
 					    metadataReady.emit(frame, metadata);
 				    });
 	ipa_->setSensorControls.connect(this, &SoftwareIsp::setSensorCtrls);
+
+	debayer_->moveToThread(&ispWorkerThread_);
 }
 
 SoftwareIsp::~SoftwareIsp()
@@ -277,7 +279,6 @@ int SoftwareIsp::configure(const StreamConfiguration &inputCfg,
 	if (ret < 0)
 		return ret;
 
-	debayer_->moveToThread(&ispWorkerThread_);
 	ispWorkerThread_.start();
 
 	ret = debayer_->invokeMethod(&Debayer::configure,
@@ -369,6 +370,7 @@ int SoftwareIsp::start()
 	if (ret)
 		return ret;
 
+	ispWorkerThread_.start();
 	return 0;
 }
 
