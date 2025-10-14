@@ -28,6 +28,7 @@
 #include "debayer_cpu.h"
 #if HAVE_DEBAYER_EGL
 #include "debayer_egl.h"
+#include "lens_shading_correction_egl.h"
 #endif
 
 /**
@@ -123,6 +124,9 @@ SoftwareIsp::SoftwareIsp(PipelineHandler *pipe, const CameraSensor *sensor,
 
 	if (softISPMode && !strcmp(softISPMode, "gpu"))
 		debayer_ = std::make_unique<DebayerEGL>(std::move(stats));
+
+	// IoT project stuff
+	const std::unique_ptr<lens_shading_correction_egl> test = std::unique_ptr<lens_shading_correction_egl>();
 #endif
 	if (!debayer_)
 		debayer_ = std::make_unique<DebayerCpu>(std::move(stats));
