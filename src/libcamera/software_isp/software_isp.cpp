@@ -126,7 +126,7 @@ SoftwareIsp::SoftwareIsp(PipelineHandler *pipe, const CameraSensor *sensor,
 		debayer_ = std::make_unique<DebayerEGL>(std::move(stats));
 
 	// IoT project stuff
-	const std::unique_ptr<lens_shading_correction_egl> test = std::unique_ptr<lens_shading_correction_egl>();
+	lensShadingCorrectionEGL_->echo();
 #endif
 	if (!debayer_)
 		debayer_ = std::make_unique<DebayerCpu>(std::move(stats));
@@ -419,6 +419,7 @@ void SoftwareIsp::stop()
  */
 void SoftwareIsp::process(uint32_t frame, FrameBuffer *input, FrameBuffer *output)
 {
+	// Dus dit doet de daadwerktelijke bewerking?
 	ipa_->computeParams(frame);
 	debayer_->invokeMethod(&Debayer::process,
 			       ConnectionTypeQueued, frame, input, output, debayerParams_);

@@ -35,6 +35,8 @@
 #include "libcamera/internal/shared_mem_object.h"
 #include "libcamera/internal/software_isp/debayer_params.h"
 
+#include <software_isp/lens_shading_correction_egl.h>
+
 namespace libcamera {
 
 class Debayer;
@@ -95,6 +97,8 @@ private:
 	void inputReady(FrameBuffer *input);
 	void outputReady(FrameBuffer *output);
 	std::unique_ptr<Debayer> debayer_;
+	// Project test dingetje
+	std::unique_ptr<lens_shading_correction_egl> lensShadingCorrectionEGL_;
 	Thread ispWorkerThread_;
 	SharedMemObject<DebayerParams> sharedParams_;
 	DebayerParams debayerParams_;
