@@ -1,0 +1,32 @@
+#version 330 core
+out vec4 FragColor;
+
+in vec3 ourColor;
+in vec2 TexCoord;
+
+uniform sampler2D ourTexture;
+
+
+void main()
+{
+		vec4 pixelclr = texture(ourTexture, TexCoord);
+
+			float pre_gray = (pixelclr.x + pixelclr.y + pixelclr.z) / 3;
+
+		vec3 RGB = 1 - pow(pixelclr.xyz + vec3(0.6), vec3(-1)) + 0.6;
+
+			float post_gray =  (RGB.x + RGB.y + RGB.z) / 3;
+
+		vec3 outputclr  = vec3(0);
+
+		if(post_gray < pre_gray){
+			outputclr = vec3(post_gray);
+		}else{
+			outputclr = vec3(pre_gray);
+		}
+
+
+ 	   FragColor = vec4(outputclr,1.0);
+//    FragColor = vec4(vec3(pre_gray),1.0);
+//    FragColor = pixelclr;
+}

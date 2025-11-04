@@ -39,7 +39,7 @@ public:
 	{
 		uint32_t stride = ALIGN_TO(width * bpp, 256);
 
-		init(width, height, bpp, stride, texture_unit, texture_unit_uniform_id);
+		init(width, height, bpp,  stride, texture_unit, texture_unit_uniform_id);
 	}
 
 	~eGLImage()

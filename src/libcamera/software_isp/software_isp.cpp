@@ -25,6 +25,8 @@
 #include "libcamera/internal/ipa_manager.h"
 #include "libcamera/internal/software_isp/debayer_params.h"
 
+#include "libcamera/framebuffer_allocator.h"
+
 #include "debayer_cpu.h"
 #if HAVE_DEBAYER_EGL
 #include "debayer_egl.h"
@@ -288,6 +290,8 @@ int SoftwareIsp::configure(const StreamConfiguration &inputCfg,
 	ret = debayer_->invokeMethod(&Debayer::configure,
 				     ConnectionTypeBlocking, inputCfg,
 				     outputCfgs, ccmEnabled_);
+
+	lensShadingCorrectionEGL_->configure();
 	if (ret) {
 		ispWorkerThread_.exit();
 		ispWorkerThread_.wait();
@@ -419,10 +423,13 @@ void SoftwareIsp::stop()
  */
 void SoftwareIsp::process(uint32_t frame, FrameBuffer *input, FrameBuffer *output)
 {
-	// Dus dit doet de daadwerktelijke bewerking?
 	ipa_->computeParams(frame);
 	debayer_->invokeMethod(&Debayer::process,
 			       ConnectionTypeQueued, frame, input, output, debayerParams_);
+
+	auto plane = output->planes();
+	FrameBuffer t = FrameBuffer(plane, 0);
+	lensShadingCorrectionEGL_->process(&t, output);
 }
 
 void SoftwareIsp::saveIspParams()
