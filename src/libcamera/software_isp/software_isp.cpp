@@ -427,7 +427,9 @@ void SoftwareIsp::process(uint32_t frame, FrameBuffer *input, FrameBuffer *outpu
 	debayer_->invokeMethod(&Debayer::process,
 			       ConnectionTypeQueued, frame, input, output, debayerParams_);
 
+	std::cout<<"voor auto ouput plane" << std::endl;
 	auto plane = output->planes();
+	std::cout<<"hier" << std::endl;
 	FrameBuffer t = FrameBuffer(plane, 0);
 	lensShadingCorrectionEGL_->process(&t, output);
 }

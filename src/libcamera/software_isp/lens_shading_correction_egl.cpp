@@ -51,6 +51,14 @@ GLuint lens_shading_correction_egl::LoadShaders(const char* frag_shader_path, co
 	GLuint fragshaderID = glCreateShader(GL_FRAGMENT_SHADER);
 	GLuint vertshaderID = glCreateShader(GL_VERTEX_SHADER);
 
+	if (fragshaderID == 0 || fragshaderID == GL_INVALID_ENUM) { 
+		LOG(LensShading, Error) << "fragshader is fout";
+	}	
+		
+	if (vertshaderID == 0 || vertshaderID == GL_INVALID_ENUM) { 
+		LOG(LensShading, Error) << "vertshader is fout";
+	}	
+
 
 	printf("loading\n");
 	//loading in fragment shader from file
@@ -110,6 +118,11 @@ GLuint lens_shading_correction_egl::LoadShaders(const char* frag_shader_path, co
 	//linking shader
 	printf("attatching\n");
 	GLuint programID = glCreateProgram();
+	
+	if (programID == 0) {
+		LOG(LensShading, Error) << "programID == 0\n";	
+	}
+
 	glAttachShader(programID, fragshaderID);
 	glAttachShader(programID, vertshaderID);
 	glLinkProgram(programID);
@@ -130,7 +143,7 @@ GLuint lens_shading_correction_egl::LoadShaders(const char* frag_shader_path, co
 
 	glDeleteShader(fragshaderID);
 	glDeleteShader(vertshaderID);
-	printf("shader done\n");
+	printf("shader done: progID - %d\n", programID);
 	return programID;
 //	return 0;
 }
