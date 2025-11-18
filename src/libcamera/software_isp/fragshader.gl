@@ -1,32 +1,124 @@
 #version 320 es
-out vec4 FragColor;
+out mediump vec4 FragColor;
 
-in vec3 ourColor;
-in vec2 TexCoord;
+in mediump vec3 ourColor;
+in mediump vec2 TexCoord;
 
 uniform sampler2D ourTexture;
 
 
+mediump vec3 rgb2hsl(mediump vec4 rgba);
+mediump vec3 hsl2rgb(mediump vec3 hsl);
+
 void main()
 {
-		vec4 pixelclr = texture(ourTexture, TexCoord);
+		mediump vec4 pixelclr = texture(ourTexture, TexCoord);
+		mediump vec3 HSL			=	rgb2hsl(pixelclr);
 
-			float pre_gray = (pixelclr.x + pixelclr.y + pixelclr.z) / 3;
+		mediump vec3 HSL_mod = vec3(HSL.xyz);
 
-		vec3 RGB = 1 - pow(pixelclr.xyz + vec3(0.6), vec3(-1)) + 0.6;
+		HSL_mod.z  =  (HSL.z * 0.5)/(HSL.z);
 
-			float post_gray =  (RGB.x + RGB.y + RGB.z) / 3;
+//		HSL_mod.z  =  0.45;
 
-		vec3 outputclr  = vec3(0);
+//		HSL_mod.y  = HSL_mod.y + 0.15;
+//			HSL_mod.z  = HSL_mod.z - 0.05;
 
-		if(post_gray < pre_gray){
-			outputclr = vec3(post_gray);
-		}else{
-			outputclr = vec3(pre_gray);
+//		if(HSL_mod.z < HSL.z){
+//			HSL_mod.z = HSL.z;
+//		}
+
+	/*
+		if(HSL.z <= 0.75f && HSL.z > 0.0){
+			HSL.z  = HSL.z + 0.2f;
 		}
+*/
+		mediump vec3 RGB			= hsl2rgb(HSL_mod);
+
+		RGB = RGB - vec3(0.1);
+
+ 	  FragColor = vec4(RGB,1.0);
+}
 
 
- 	   FragColor = vec4(outputclr,1.0);
-//    FragColor = vec4(vec3(pre_gray),1.0);
-//    FragColor = pixelclr;
+mediump vec3 hsl2rgb(mediump vec3 hsl){
+
+	mediump float chroma = (1.0 - abs(2.0 * hsl.z - 1.0)) * hsl.y;
+	mediump float hue_prime = hsl.x / 60.0;
+	mediump float x = chroma * (1.0 - abs( mod(hue_prime, 2.0) -1.0));
+
+	mediump vec3 rgb1;
+
+	if((0.0 <=hue_prime) && (hue_prime < 1.0)){
+		rgb1 = vec3(chroma, x, 0);
+
+	}else if((1.0 <=hue_prime) && (hue_prime < 2.0)){
+		rgb1 = vec3(x, chroma,0);
+
+	}else	if((2.0<=hue_prime) && (hue_prime < 3.0)){
+		rgb1 = vec3(0, chroma, x);
+
+	}else	if((3.0<=hue_prime) && (hue_prime < 4.0)){
+		rgb1 = vec3(0, x, chroma);
+
+	}else	if((4.0<=hue_prime) && (hue_prime < 5.0)){
+		rgb1 = vec3(x,0, chroma);	\
+
+	}else	if((5.0<=hue_prime) && (hue_prime < 6.0)){
+		rgb1 = vec3(chroma, 0, x);
+
+	}
+
+	mediump float m = hsl.z - (chroma/2.0);
+
+	mediump vec3 rgb = vec3( rgb1.x + m , rgb1.y + m, rgb1.z + m);
+
+	return vec3(rgb);
+}
+
+ mediump vec3 rgb2hsl(mediump vec4 rgba){
+/*
+		for the input color is an alpha of 1.0f assumed
+		https://en.wikipedia.org/wiki/HSL_and_HSV#From_RGB
+*/
+
+	mediump float xmax = max(max(rgba.x, rgba.y), rgba.z);
+	mediump float xmin = min(min(rgba.x, rgba.y), rgba.z);
+	mediump float chroma = xmax - xmin;
+	mediump float lightness = (xmax + xmin) / 2.0;
+	mediump float hue;
+	if(xmax == rgba.x){
+		//max == red
+
+		hue = 60.0 * (  mod((rgba.y - rgba.z)/chroma, 6.0) );
+
+	}else if(xmax == rgba.y){
+		//max == green
+
+		hue = 60.0 * (((rgba.z - rgba.x)/chroma) + 2.0);
+
+	}else if(xmax == rgba.z){
+		//red == blue
+
+		hue = 60.0 * (((rgba.x - rgba.y)/chroma) + 4.0);
+
+	}else if(chroma == 0.0f){
+		hue = 0.0f;
+	}
+
+	mediump	float sv;
+	if(xmax == 0.0f){
+		sv = 0.0f;
+	}else{
+		sv = chroma/xmax;
+	}
+
+	mediump float sl;
+	if((lightness == 0.0f) || (lightness == 1.0f)){
+		sl = 0.0;
+	}else{
+		sl = (xmax - lightness) / min(lightness, 1.0 - lightness);
+	}
+
+	return vec3(hue, sl, lightness);
 }
