@@ -252,6 +252,31 @@ void eGL::createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint
 	// Wrap to edge to avoid edge artifacts
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
+}
+
+void eGL::createTexture2D(eGLImage *eglImage, GLint format, uint32_t width, uint32_t height, void *data, GLint gl_scale_param)
+{
+	ASSERT(tid_ == Thread::currentId());
+
+	glActiveTexture(eglImage->texture_unit_);
+	glBindTexture(GL_TEXTURE_2D, eglImage->texture_);
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// Generate texture, bind, associate image to texture, configure, unbind
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+	// Nearest filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_scale_param);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_scale_param);
+
+	// Wrap to edge to avoid edge artifacts
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
 }
 
 /**
