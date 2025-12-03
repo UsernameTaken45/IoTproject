@@ -137,6 +137,10 @@ void main(void) {
 #if defined(APPLY_CCM_PARAMETERS)
 
 	rgb = rgb - blacklevel;
+    rgb = rgb * 2;
+
+    // Hier ons stuk
+    // Kan eventueel met een #ifdef, nu niet echt nodig, deze build is toch alleen om te testen.
 
 	/*
 	 *   CCM is a 3x3 in the format

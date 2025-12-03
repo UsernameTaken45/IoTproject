@@ -248,6 +248,10 @@ int DebayerEGL::initBayerShaders(PixelFormat inputFormat, PixelFormat outputForm
 		break;
 	};
 
+#if defined DO_LSC
+	egl_.pushEnv(shaderEnv, "#define LSC");
+#endif
+
 	if (ccmEnabled_) {
 		// Run the CCM if available
 		egl_.pushEnv(shaderEnv, "#define APPLY_CCM_PARAMETERS");
