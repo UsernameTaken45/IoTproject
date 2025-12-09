@@ -24,6 +24,8 @@ DebayerEGL::DebayerEGL(std::unique_ptr<SwStatsCpu> stats, const GlobalConfigurat
 	: Debayer(configuration), stats_(std::move(stats))
 {
 	eglImageBayerIn_ = eglImageBayerOut_= eglImageRedLookup_ = eglImageBlueLookup_ = eglImageGreenLookup_ = NULL;
+	eglImageLSCLookup_ = NULL;
+
 }
 
 DebayerEGL::~DebayerEGL()
@@ -114,6 +116,11 @@ int DebayerEGL::getShaderVariableLocations(void)
 	textureUniformStrideFactor_ = glGetUniformLocation(programId_, "stride_factor");
 	textureUniformBayerFirstRed_ = glGetUniformLocation(programId_, "tex_bayer_first_red");
 	textureUniformProjMatrix_ = glGetUniformLocation(programId_, "proj_matrix");
+
+
+//acces texture uniform shader
+	textureUniformLSC_ = glGetUniformLocation(programId_,"lsc_tex");
+	printf("LENS SHADING TEXTURE UNFORM LOADED");
 
 	LOG(Debayer, Debug) << "vertexIn " << attributeVertex_ << " textureIn " << attributeTexture_
 			    << " tex_y " << textureUniformBayerDataIn_
@@ -524,9 +531,25 @@ void DebayerEGL::setShaderVariableValues(DebayerParams &params)
 		glUniform1i(textureUniformGreenLookupDataIn_, eglImageGreenLookup_->texture_unit_uniform_id_);
 		glUniform1i(textureUniformBlueLookupDataIn_, eglImageBlueLookup_->texture_unit_uniform_id_);
 
+		//LSC
+		glUniform1i(textureUniformLSC_,eglImageLSCLookup_->texture_unit_uniform_id_);
+
 		egl_.createTexture2D(eglImageRedLookup_, GL_LUMINANCE, DebayerParams::kRGBLookupSize, 1, &params.red);
 		egl_.createTexture2D(eglImageGreenLookup_, GL_LUMINANCE, DebayerParams::kRGBLookupSize, 1, &params.green);
 		egl_.createTexture2D(eglImageBlueLookup_, GL_LUMINANCE, DebayerParams::kRGBLookupSize, 1, &params.blue);
+
+		//int chess[] = { 0, 1, 0, 1, 0,
+		//								1, 0, 1, 0, 1,
+		//								0, 1, 0, 1, 0,
+		//								1, 0, 1, 0, 1,
+		//								0, 1, 0, 1, 0};
+		int chess[] = { 0, 1, 0,
+										1, 0, 1,
+										0, 1, 0};
+
+
+
+		egl_.createTexture2D(eglImageLSCLookup_, GL_LUMINANCE, 3, 3, &chess);
 
 		LOG (Debayer, Debug) << "textureUniformRedLookupDataIn_ " << textureUniformRedLookupDataIn_
 				     << " textureUniformGreenLookupDataIn_ " << textureUniformGreenLookupDataIn_

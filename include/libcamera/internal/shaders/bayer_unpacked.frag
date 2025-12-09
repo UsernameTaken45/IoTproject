@@ -24,6 +24,10 @@ uniform sampler2D       tex_y;
 uniform sampler2D	red_param;
 uniform sampler2D	green_param;
 uniform sampler2D	blue_param;
+
+uniform sampler2D lsc_tex;
+
+
 varying vec4            center;
 varying vec4            yCoord;
 varying vec4            xCoord;
@@ -31,6 +35,9 @@ uniform mat3		ccm;
 uniform vec3		blacklevel;
 uniform float		gamma;
 uniform float contrast;
+
+
+
 
 float apply_contrast(float normalise, float contrast_in)
 {
@@ -137,7 +144,6 @@ void main(void) {
 #if defined(APPLY_CCM_PARAMETERS)
 
 	rgb = rgb - blacklevel;
-    rgb = rgb * 2;
 
     // Hier ons stuk
     // Kan eventueel met een #ifdef, nu niet echt nodig, deze build is toch alleen om te testen.
@@ -173,7 +179,7 @@ void main(void) {
 	 *             RedBlueGain,  GreenBlueGain,  BlueBlueGain,
 	 *   }
 	 *
-	 *   However the indexing for the mat data-type is column major hence
+	 *   However the indexing for the mat outputBufferReady.emitdata-type is column major hence
 	 *   ccm[0][0] = RedRedGain, ccm[0][1] = RedGreenGain, ccm[0][2] = RedBlueGain
 	 *
 	 */
@@ -201,6 +207,18 @@ void main(void) {
 	rgb.g = texture2D(green_param, vec2(rgb.g, 0.5)).g;
 	rgb.b = texture2D(blue_param, vec2(rgb.b, 0.5)).b;
 #endif
+
+
+//appliedshader
+	vec2 cord;
+	cord.r = xCoord.x;
+	cord.g = yCoord.x;
+	rgb.r = rgb.r * texture2D(lsc_tex, cord).r;
+	rgb.g = rgb.g * texture2D(lsc_tex, cord).r * 0.0;
+	rgb.b = rgb.b * texture2D(lsc_tex, cord).r * 0.0;
+
+
+
 
 #if defined (SWAP_BLUE)
 	gl_FragColor = vec4(rgb.bgr, 1.0);

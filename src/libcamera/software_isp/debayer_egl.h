@@ -121,6 +121,12 @@ private:
 	eGLImage *eglImageGreenLookup_;
 	eGLImage *eglImageBlueLookup_;
 
+
+
+	// Pointer to object representing input texture
+	eGLImage *eglImageLSCLookup_;
+
+
 	// Shader parameters
 	float firstRed_x_;
 	float firstRed_y_;
@@ -133,8 +139,10 @@ private:
 	GLint textureUniformProjMatrix_;
 
 	GLint textureUniformBayerDataIn_;
+// lens shadeing shader variable
+	GLint textureUniformLSC_;
 
-	// These textures will either point to simple RGB gains or to CCM lookup tables
+// These textures will either point to simple RGB gains or to CCM lookup tables
 	GLint textureUniformRedLookupDataIn_;
 	GLint textureUniformGreenLookupDataIn_;
 	GLint textureUniformBlueLookupDataIn_;
