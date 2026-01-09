@@ -113,20 +113,7 @@ public:
 	int createInputDMABufTexture2D(eGLImage &eglImage, int fd);
 	int createOutputDMABufTexture2D(eGLImage &eglImage, int fd);
 	void destroyDMABufTexture(eGLImage &eglImage);
-	void createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint32_t height, void *data);
-
-	/**
-	* \brief Create a 2D texture from a memory buffer
-	* \param[in,out] eglImage EGL image to associate with the texture
-	* \param[in] format OpenGL internal format (e.g., GL_RGB, GL_RGBA)
-	* \param[in] width Texture width in pixels
-	* \param[in] height Texture height in pixels
-	* \param[in] data Pointer to pixel data, or nullptr for uninitialised texture
-	* \param[in] gl_scale_param GL constant passed to glTexParameteri
-	*
-	* Overload of createTexture2D with an extra parameter for passing a custom param to glTexParameteri.
-	*/
-	void createTexture2D(eGLImage *eglImage, GLint format, uint32_t width, uint32_t height, void *data, GLint gl_scale_param);
+	void createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint32_t height, void *data, GLint gl_scale_param=GL_NEAREST);
 
 	void pushEnv(std::vector<std::string> &shaderEnv, const char *str);
 	void makeCurrent();
