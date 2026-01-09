@@ -89,7 +89,6 @@ void Ccm::prepare(IPAContext &context, const uint32_t frame,
 	auto &saturation = context.activeState.knobs.saturation;
 
 	const unsigned int ct = context.activeState.awb.temperatureK;
-
 	/* Change CCM only on saturation or bigger temperature changes. */
 	if (frame > 0 &&
 	    utils::abs_diff(ct, lastCt_) < kTemperatureThreshold &&
