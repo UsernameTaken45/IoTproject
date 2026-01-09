@@ -48,6 +48,7 @@ int DebayerEGL::getInputConfig(PixelFormat inputFormat, DebayerInputConfig &conf
 	BayerFormat bayerFormat =
 		BayerFormat::fromPixelFormat(inputFormat);
 
+#if 0
 	if ((bayerFormat.bitDepth == 8 || bayerFormat.bitDepth == 10) &&
 	    bayerFormat.packing == BayerFormat::Packing::None &&
 	    isStandardBayerOrder(bayerFormat.order)) {
@@ -60,7 +61,7 @@ int DebayerEGL::getInputConfig(PixelFormat inputFormat, DebayerInputConfig &conf
 								  formats::ABGR8888 });
 		return 0;
 	}
-
+#else
 	if (bayerFormat.bitDepth == 10 &&
 	    bayerFormat.packing == BayerFormat::Packing::CSI2 &&
 	    isStandardBayerOrder(bayerFormat.order)) {
@@ -73,7 +74,7 @@ int DebayerEGL::getInputConfig(PixelFormat inputFormat, DebayerInputConfig &conf
 								  formats::ABGR8888 });
 		return 0;
 	}
-
+#endif
 	LOG(Debayer, Error)
 		<< "Unsupported input format " << inputFormat;
 
