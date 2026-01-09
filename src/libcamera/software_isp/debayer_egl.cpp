@@ -504,6 +504,7 @@ void DebayerEGL::setShaderVariableValues(DebayerParams &params)
 	LOG(Debayer, Debug) << " ccmUniformDataIn_ " << ccmUniformDataIn_ << " data " << params.ccm;
 
 	//LSC
+	/*
 	GLubyte lsc_red[] = {
 		224,  177,  139,  100,   61,   32,    8,    6,    6,   13,   40,   73,  114,  151,  203,  255,  195,
 		195,  158,  119,   73,   35,   13,    0,    0,    0,    1,   19,   46,   90,  134,  178,  217,  176,
@@ -560,10 +561,10 @@ void DebayerEGL::setShaderVariableValues(DebayerParams &params)
 		192,  157,  123,   82,   45,   25,    6,    5,    5,   16,   35,   62,  100,  142,  178,  217,  220,
 		220,  170,  136,  102,   66,   41,   20,   20,   20,   34,   55,   84,  119,  157,  204,  255,
 	   };
-
-	egl_.createTexture2D(eglImageLSCLookupRed_, GL_LUMINANCE, 16, 16, &lsc_red, GL_LINEAR);
-	egl_.createTexture2D(eglImageLSCLookupBlue_, GL_LUMINANCE, 16, 16, &lsc_green, GL_LINEAR);
-	egl_.createTexture2D(eglImageLSCLookupGreen_, GL_LUMINANCE, 16, 16, &lsc_blue, GL_LINEAR);
+*/
+	egl_.createTexture2D(*eglImageLSCLookupRed_, GL_LUMINANCE, 16, 16, &params.LSC_red, GL_LINEAR);
+	egl_.createTexture2D(*eglImageLSCLookupBlue_, GL_LUMINANCE, 16, 16, &params.LSC_green, GL_LINEAR);
+	egl_.createTexture2D(*eglImageLSCLookupGreen_, GL_LUMINANCE, 16, 16, &params.LSC_blue, GL_LINEAR);
 
 	glUniform1i(textureUniformLSCRed_, eglImageLSCLookupRed_->texture_unit_uniform_id_);
 	glUniform1i(textureUniformLSCGreen_, eglImageLSCLookupGreen_->texture_unit_uniform_id_);
