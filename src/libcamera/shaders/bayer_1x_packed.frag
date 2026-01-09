@@ -70,6 +70,10 @@ uniform vec3 blacklevel;
 uniform float gamma;
 uniform float contrastExp;
 
+uniform sampler2D lsc_tex_red;
+uniform sampler2D lsc_tex_blue;
+uniform sampler2D lsc_tex_green;
+
 float apply_contrast(float value)
 {
 	// Apply simple S-curve
@@ -226,6 +230,12 @@ void main(void)
 			vec3(patterns.wz, C));
 
 	rgb = rgb - blacklevel;
+
+	#if defined(DO_LSC)
+	rgb.r = rgb.r + rgb.r * texture2D(lsc_tex_red, textureOut).x;
+	rgb.g = rgb.g + rgb.g * texture2D(lsc_tex_green, textureOut).x;
+	rgb.b = rgb.b + rgb.b * texture2D(lsc_tex_blue, textureOut).x;
+	#endif
 
 	/*
 	 *   CCM is a 3x3 in the format
