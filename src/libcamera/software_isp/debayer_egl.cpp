@@ -144,6 +144,9 @@ int DebayerEGL::initBayerShaders(PixelFormat inputFormat, PixelFormat outputForm
 	/* Specify GL_OES_EGL_image_external */
 	egl_.pushEnv(shaderEnv, "#extension GL_OES_EGL_image_external: enable");
 
+	/* Always use LSC */
+	egl_.pushEnv(shaderEnv, "#define DO_LSC");
+
 	/*
 	 * Tell shaders how to re-order output taking account of how the
 	 * pixels are actually stored by GBM
