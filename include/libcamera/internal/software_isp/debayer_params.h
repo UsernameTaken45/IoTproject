@@ -30,6 +30,8 @@ struct DebayerParams {
 	using LookupTable = std::array<uint8_t, kRGBLookupSize>;
 	using CcmLookupTable = std::array<CcmColumn, kRGBLookupSize>;
 
+	using LscLookupTable = uint8_t[16*16];
+
 	/*
 	 * Color lookup tables when CCM is not used.
 	 *
@@ -52,6 +54,10 @@ struct DebayerParams {
 	CcmLookupTable greenCcm;
 	CcmLookupTable blueCcm;
 	LookupTable gammaLut;
+
+	LscLookupTable LSC_red;
+	LscLookupTable LSC_green;
+	LscLookupTable LSC_blue;
 
 	/*
 	 * Per frame corrections as calculated by the IPA

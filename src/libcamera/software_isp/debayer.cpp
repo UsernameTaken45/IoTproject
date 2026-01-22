@@ -66,6 +66,11 @@ namespace libcamera {
  */
 
 /**
+ * \typedef DebayerParams::LscLookupTable
+ * \brief Type of the LSC lookup tables
+ */
+
+/**
  * \var DebayerParams::red
  * \brief Lookup table for red color, mapping input values to output values
  */
@@ -118,6 +123,19 @@ namespace libcamera {
 /**
  * \var DebayerParams::contrastExp
  * \brief Contrast value for GPUISP
+ */
+
+/**
+ * \var DebayerParams::LSC_red
+ * \brief Per frame Lens shading correction red channel
+ */
+/**
+ * \var DebayerParams::LSC_green
+ * \brief Per frame Lens shading correction red channel
+ */
+/**
+ * \var DebayerParams::LSC_blue
+ * \brief Per frame Lens shading correction red channel
  */
 
 /**
