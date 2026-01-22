@@ -6,4 +6,5 @@ soft_simple_ipa_algorithms = files([
     'blc.cpp',
     'ccm.cpp',
     'lut.cpp',
+    'lsc.cpp',
 ])
