@@ -111,6 +111,10 @@ int DebayerEGL::getShaderVariableLocations(void)
 	textureUniformBayerFirstRed_ = glGetUniformLocation(programId_, "tex_bayer_first_red");
 	textureUniformProjMatrix_ = glGetUniformLocation(programId_, "proj_matrix");
 
+	textureUniformLSCRed_ = glGetUniformLocation(programId_, "lsc_tex_red");
+	textureUniformLSCGreen_ = glGetUniformLocation(programId_, "lsc_tex_green");
+	textureUniformLSCBlue_ = glGetUniformLocation(programId_, "lsc_tex_blue");
+
 	LOG(Debayer, Debug) << "vertexIn " << attributeVertex_ << " textureIn " << attributeTexture_
 			    << " tex_y " << textureUniformBayerDataIn_
 			    << " ccm " << ccmUniformDataIn_
@@ -139,6 +143,9 @@ int DebayerEGL::initBayerShaders(PixelFormat inputFormat, PixelFormat outputForm
 
 	/* Specify GL_OES_EGL_image_external */
 	egl_.pushEnv(shaderEnv, "#extension GL_OES_EGL_image_external: enable");
+
+	/* Always use LSC */
+	egl_.pushEnv(shaderEnv, "#define DO_LSC");
 
 	/*
 	 * Tell shaders how to re-order output taking account of how the
@@ -349,6 +356,13 @@ int DebayerEGL::configure(const StreamConfiguration &inputCfg,
 	 */
 	stats_->setWindow(Rectangle(window_.size()));
 
+	//LSC
+	eglImageLSCLookupRed_ = new eGLImage(20, 20, sizeof(GLubyte), GL_TEXTURE5, 5);
+	eglImageLSCLookupGreen_ = new eGLImage(20, 20, sizeof(GLubyte), GL_TEXTURE5, 5);
+	eglImageLSCLookupBlue_ = new eGLImage(20, 20, sizeof(GLubyte), GL_TEXTURE5, 5);
+	if (!eglImageLSCLookupRed_ || !eglImageLSCLookupGreen_ || !eglImageLSCLookupBlue_)
+		return -ENOMEM;
+
 	return 0;
 }
 
@@ -487,6 +501,73 @@ void DebayerEGL::setShaderVariableValues(DebayerParams &params)
 	};
 	glUniformMatrix3fv(ccmUniformDataIn_, 1, GL_FALSE, ccm);
 	LOG(Debayer, Debug) << " ccmUniformDataIn_ " << ccmUniformDataIn_ << " data " << params.ccm;
+
+	//LSC
+	/*
+	GLubyte lsc_red[] = {
+		224,  177,  139,  100,   61,   32,    8,    6,    6,   13,   40,   73,  114,  151,  203,  255,  195,
+		195,  158,  119,   73,   35,   13,    0,    0,    0,    1,   19,   46,   90,  134,  178,  217,  176,
+		176,  144,   98,   50,   13,    0,    0,    0,    0,    0,    1,   24,   67,  117,  161,  193,  163,
+		163,  131,   79,   30,    2,    0,    0,    0,    0,    0,    0,    8,   47,  100,  148,  178,  154,
+		154,  117,   63,   15,    0,    0,    0,    0,    0,    0,    0,    2,   31,   84,  137,  169,  147,
+		147,  106,   50,    7,    0,    0,    0,    0,    0,    0,    0,    0,   20,   72,  128,  162,  143,
+		143,   97,   39,    3,    0,    0,    0,    0,    0,    0,    0,    0,   13,   63,  121,  159,  141,
+		141,   92,   34,    1,    0,    0,    0,    0,    0,    0,    0,    0,   10,   59,  117,  158,  141,
+		141,   92,   34,    1,    0,    0,    0,    0,    0,    0,    0,    0,   10,   59,  117,  158,  141,
+		141,   94,   37,    2,    0,    0,    0,    0,    0,    0,    0,    0,   12,   63,  121,  158,  143,
+		143,  101,   44,    4,    0,    0,    0,    0,    0,    0,    0,    0,   19,   72,  127,  161,  147,
+		147,  111,   56,   10,    0,    0,    0,    0,    0,    0,    0,    1,   30,   83,  135,  168,  155,
+		155,  122,   70,   21,    0,    0,    0,    0,    0,    0,    0,    7,   45,   98,  145,  177,  166,
+		166,  133,   88,   39,    5,    0,    0,    0,    0,    0,    1,   21,   63,  114,  157,  191,  183,
+		183,  143,  104,   59,   19,    2,    0,    0,    0,    1,   10,   41,   83,  130,  171,  215,  208,
+		208,  154,  115,   77,   39,   13,    1,    0,    0,    8,   30,   62,  101,  142,  193,  250,
+	   };
+
+	GLubyte lsc_green[] = {
+		196,  102,   30,    1,    0,    0,    0,    0,    0,    0,    0,    0,    4,   47,  150,  255,  138,
+		138,   68,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   22,  102,  182,   98,
+		 98,   42,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    8,   69,  133,   71,
+		 71,   21,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    1,   46,  103,   51,
+		 51,    8,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   29,   85,   38,
+		 38,    3,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   18,   71,   31,
+		 31,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   11,   66,   29,
+		 29,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    9,   65,   29,
+		 29,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    9,   65,   29,
+		 29,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   11,   65,   32,
+		 32,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   18,   70,   39,
+		 39,    4,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   29,   82,   55,
+		 55,   11,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    2,   46,  102,   77,
+		 77,   22,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    8,   67,  132,  112,
+		112,   40,    2,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   22,   96,  179,  163,
+		163,   61,    5,    0,    0,    0,    0,    0,    0,    0,    0,    0,    1,   40,  139,  250,
+	   };
+
+	GLubyte lsc_blue[] = {
+		230,  182,  146,  110,   76,   49,   29,   24,   24,   30,   52,   80,  116,  149,  198,  250,  201,
+		201,  165,  129,   88,   54,   31,   13,    7,    7,   15,   35,   58,   96,  135,  174,  214,  181,
+		181,  152,  111,   68,   36,   13,    2,    0,    0,    4,   15,   41,   77,  121,  158,  189,  167,
+		167,  139,   93,   51,   20,    2,    0,    0,    0,    0,    4,   27,   60,  106,  147,  175,  158,
+		158,  126,   78,   37,    8,    0,    0,    0,    0,    0,    0,   15,   47,   92,  137,  166,  151,
+		151,  115,   66,   26,    2,    0,    0,    0,    0,    0,    0,    7,   37,   81,  129,  159,  147,
+		147,  107,   56,   18,    0,    0,    0,    0,    0,    0,    0,    4,   30,   74,  122,  156,  146,
+		146,  102,   52,   14,    0,    0,    0,    0,    0,    0,    0,    2,   27,   70,  119,  156,  146,
+		146,  102,   52,   14,    0,    0,    0,    0,    0,    0,    0,    2,   27,   70,  119,  156,  146,
+		146,  105,   55,   16,    0,    0,    0,    0,    0,    0,    0,    4,   31,   74,  123,  156,  148,
+		148,  112,   62,   22,    1,    0,    0,    0,    0,    0,    0,    8,   38,   83,  130,  160,  153,
+		153,  122,   73,   32,    5,    0,    0,    0,    0,    0,    0,   16,   48,   94,  139,  166,  163,
+		163,  134,   88,   44,   13,    0,    0,    0,    0,    0,    4,   28,   62,  109,  150,  176,  174,
+		174,  145,  106,   62,   26,    6,    0,    0,    0,    4,   16,   43,   80,  126,  162,  192,  192,
+		192,  157,  123,   82,   45,   25,    6,    5,    5,   16,   35,   62,  100,  142,  178,  217,  220,
+		220,  170,  136,  102,   66,   41,   20,   20,   20,   34,   55,   84,  119,  157,  204,  255,
+	   };
+*/
+	egl_.createTexture2D(*eglImageLSCLookupRed_, GL_LUMINANCE, 16, 16, &params.LSC_red, GL_LINEAR);
+	egl_.createTexture2D(*eglImageLSCLookupBlue_, GL_LUMINANCE, 16, 16, &params.LSC_green, GL_LINEAR);
+	egl_.createTexture2D(*eglImageLSCLookupGreen_, GL_LUMINANCE, 16, 16, &params.LSC_blue, GL_LINEAR);
+
+	glUniform1i(textureUniformLSCRed_, eglImageLSCLookupRed_->texture_unit_uniform_id_);
+	glUniform1i(textureUniformLSCGreen_, eglImageLSCLookupGreen_->texture_unit_uniform_id_);
+	glUniform1i(textureUniformLSCBlue_, eglImageLSCLookupBlue_->texture_unit_uniform_id_);
 
 	/*
 	 * 0 = Red, 1 = Green, 2 = Blue

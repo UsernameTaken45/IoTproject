@@ -85,6 +85,11 @@ private:
 	std::unique_ptr<eGLImage> eglImageBayerIn_;
 	std::unique_ptr<eGLImage> eglImageBayerOut_;
 
+	/* Pointer to object representing input texture */
+	eGLImage *eglImageLSCLookupRed_;
+	eGLImage *eglImageLSCLookupBlue_;
+	eGLImage *eglImageLSCLookupGreen_;
+
 	/* Shader parameters */
 	float firstRed_x_;
 	float firstRed_y_;
@@ -97,6 +102,10 @@ private:
 	GLint textureUniformProjMatrix_;
 
 	GLint textureUniformBayerDataIn_;
+
+	GLint textureUniformLSCRed_;
+	GLint textureUniformLSCGreen_;
+	GLint textureUniformLSCBlue_;
 
 	/* Represent per-frame CCM as a uniform vector of floats 3 x 3 */
 	GLint ccmUniformDataIn_;
