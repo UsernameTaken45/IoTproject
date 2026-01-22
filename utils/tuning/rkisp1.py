@@ -35,7 +35,7 @@ lsc = LSCRkISP1(debug=[lt.Debug.Plot],
                 # module. rkisp1's table sector sizes (16x16 programmed as mirrored
                 # 8x8) are separate, and is hardcoded in its specific LSC tuning
                 # module.
-                sector_shape=(17, 17),
+                sector_shape=(16, 16),
 
                 sector_x_gradient=lt.gradient.Linear(lt.Remainder.DistributeFront),
                 sector_y_gradient=lt.gradient.Linear(lt.Remainder.DistributeFront),
