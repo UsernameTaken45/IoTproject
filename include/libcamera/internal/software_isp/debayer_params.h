@@ -20,6 +20,7 @@ namespace libcamera {
 
 struct DebayerParams {
 	static constexpr unsigned int kRGBLookupSize = 256;
+	static constexpr unsigned int LSCLookupSize = 16*16;
 
 	struct CcmColumn {
 		int16_t r;
@@ -30,7 +31,8 @@ struct DebayerParams {
 	using LookupTable = std::array<uint8_t, kRGBLookupSize>;
 	using CcmLookupTable = std::array<CcmColumn, kRGBLookupSize>;
 
-	using LscLookupTable = uint8_t[16*16];
+	//using LscLookupTable = uint8_t[LSCLookupSize];
+	using LscLookupTable = std::array<uint8_t, LSCLookupSize>;
 
 	/*
 	 * Color lookup tables when CCM is not used.
@@ -55,9 +57,9 @@ struct DebayerParams {
 	CcmLookupTable blueCcm;
 	LookupTable gammaLut;
 
-	LscLookupTable LSC_red;
-	LscLookupTable LSC_green;
-	LscLookupTable LSC_blue;
+	LscLookupTable lscRed;
+	LscLookupTable lscGreen;
+	LscLookupTable lscBlue;
 
 	/*
 	 * Per frame corrections as calculated by the IPA

@@ -48,9 +48,9 @@ void Lsc::prepare(IPAContext &context, [[maybe_unused]] const uint32_t frame,
 	const Matrix<uint8_t, 16, 16> matrix_b = lsc_b.getInterpolated(ct);
 
 	for (unsigned long i = 0;  i < matrix_r.data().size(); ++i) {
-		params->LSC_red[i] = matrix_r.data()[i];
-		params->LSC_green[i] = matrix_g.data()[i];
-		params->LSC_blue[i] = matrix_b.data()[i];
+		params->lscRed[i] = matrix_r.data()[i];
+		params->lscGreen[i] = matrix_g.data()[i];
+		params->lscBlue[i] = matrix_b.data()[i];
 	}
 }
 
