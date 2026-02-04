@@ -229,14 +229,14 @@ void eGL::destroyDMABufTexture(eGLImage &eglImage)
  * \param[in] width Texture width in pixels
  * \param[in] height Texture height in pixels
  * \param[in] data Pointer to pixel data, or nullptr for uninitialised texture
- * \param[in] gl_scale_param GL texture filter setting
+ * \param[in] glFilterParam GL texture filter setting
  *
  * Creates a 2D texture from a CPU-accessible memory buffer. The texture
  * is configured with nearest filtering and clamp-to-edge wrapping. This
  * is useful for uploading static data like lookup tables or uniform color
  * matrices to the GPU.
  */
-void eGL::createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint32_t height, void *data, GLint gl_scale_param)
+void eGL::createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint32_t height, void *data, GLint glFilterParam)
 {
 	ASSERT(tid_ == Thread::currentId());
 
@@ -247,8 +247,8 @@ void eGL::createTexture2D(eGLImage &eglImage, GLint format, uint32_t width, uint
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
 	// Nearest filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_scale_param);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_scale_param);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilterParam);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilterParam);
 
 	// Wrap to edge to avoid edge artifacts
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
